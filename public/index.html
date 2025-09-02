@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BonziTUBE</title>
+    <link rel="icon" href="./img/icon.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.0/socket.io.js"></script>
+    <style>
+        body {
+            background: #6e6e6e;
+            background: linear-gradient(0deg, rgba(110, 110, 110, 1) 0%, rgba(255, 255, 255, 1) 100%);
+            background-size:cover;
+            background-attachment: fixed;
+            background-repeat:no-repeat;
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .menu {
+            display:flex;
+            flex-direction:row;
+            gap:10px;
+            align-items: center;
+            padding:5px;
+        }
+        .main {
+            position:fixed;
+            z-index:9999;
+            left:0px;top:0px;
+            width:100%;
+            height:10%;
+            border:1px solid rgb(123, 123, 123);
+            border-radius:10px;
+            background: #bdbdbd;
+background: linear-gradient(180deg, rgba(189, 189, 189, 1) 0%, rgba(129, 119, 143, 1) 20%, rgba(181, 176, 176, 1) 47%, rgba(252, 252, 252, 1) 91%);
+        }
+        button {
+            border:1px solid rgb(125, 125, 125);
+            border-radius:8px;
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #bfa9d4;
+background: linear-gradient(0deg, rgba(191, 169, 212, 1) 0%, rgba(77, 46, 120, 1) 19%, rgba(134, 77, 191, 1) 56%, rgba(166, 108, 217, 1) 57%, rgba(252, 252, 252, 1) 100%);
+            height:90%;
+            color:white;
+            text-shadow:1px 1px 1px rgba(0, 0, 0, 0.232);
+            filter:drop-shadow(0px 0px 5px rgba(255,255,255,1));
+        }
+        button:hover {
+            filter:brightness(1.2);
+        }
+        button:active{
+            filter:brightness(0.8);
+            
+        }
+        .template {
+            display:none;
+        }
+        .thumbs {
+            gap:5px;
+        }
+        #content {
+            position:absolute;
+            top:15%;
+        }
+        .thumbnail {
+            display:flex;
+            flex-direction:column;
+            gap:3px;
+            background-color: rgba(255, 255, 255, 0.53);
+            border:1px solid rgb(70, 70, 70);
+            border-radius:3px;
+            padding:2px;
+            align-items: center;
+            min-width:169px;
+        }
+        .thumbnail:hover{
+            color:#1d1d1d;
+            filter:drop-shadow(0px 0px 8px rgb(255, 255, 255));
+            border:2px solid rgb(70, 70, 70);
+        }
+        .title {
+            font-size:18px;
+        }
+        .author {
+            font-size:13px;
+            color:gray;
+        }
+        .thumbcont {
+            border:1px solid gray;
+            width:100px;
+            height:56px;
+        }
+        .uploadfield {
+            width:200px;
+            height:32px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main menu">
+        <img src="./img/logo.png" width="100" height="auto">
+        <button id="gethome">All Videos</button>
+        <button id="getupload">Create Video</button> 
+    </div>
+    <div class="thumbnail" style="display:none;" id="thumbnail">
+        <img class="thumbcont" src="https://files.catbox.moe/e36wsh.png" width="100" height="56">
+        <p>
+            <span class="title">I WENT TO TEL AVIV</span><br>
+            <span class="author">By Joel</span>
+        </p>
+    </div>
+    <div class="template" id="trending">
+       <p style="font-size:14px;">Welcome to BonziTUBE!</p>
+        <hr>
+        <p>Most Viewed</p> 
+        <div class="menu thumbs" placeid="trending_1">
+        </div>
+        <div class="menu thumbs" placeid="trending_2"></div>
+        <div class="menu thumbs" placeid="trending_3"></div>
+    </div>
+    <div class="template" id="createvideo">
+        <p style="max-width:300px;">
+            BonziTUBE uses catbox.moe's external
+            media uploads to help keep BonziTUBE operating.
+            Use catbox.moe for thumbnails, and your videos, then
+            copy the links from there.
+        </p>
+        <button onclick="window.open('https://catbox.moe')">Catbox</button>
+        <br>
+        Video uploads must be .mp4 format
+        <br>
+        <input type="text" placeid="newtitle" placeholder="Video Title.." class="uploadfield">
+        <input type="text" placeid="newauthor" placeholder="Video Creator/Author.." class="uploadfield"><hr>
+        <input type="text" placeid="newthumbnail" placeholder="Image Thumbnail URL.." class="uploadfield"><br>
+        <input type="text" placeid="newvideo" placeholder="Video URL.." class="uploadfield">
+        <hr>
+        <button placeid="uploadvideo">Upload Video</button>
+    </div>
+    <div id="content">
+        <p style="font-size:14px;">Welcome to BonziTUBE!</p>
+        <hr>
+        <p>Most Viewed</p>
+        <div class="menu thumbs" id="trending_1">
+        </div>
+        <div class="menu thumbs" id="trending_2"></div>
+        <div class="menu thumbs" id="trending_3"></div>
+    </div>
+    <script defer src="script.js"></script>
+</body>
+</html>

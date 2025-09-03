@@ -1,5 +1,26 @@
 let socket = io(location.href);
+
 function $(a){return document.getElementById(a);}
+let myUsername = getCookie("username") || "";
+function setCookie(name, value, days = 30) {
+    let expires = new Date(Date.now() + days * 864e5).toUTCString();
+    document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/';
+}
+
+function getCookie(name) {
+    return document.cookie.split('; ').find(row => row.startsWith(name + '='))?.split('=')[1];
+}
+
+if (myUsername) {
+    document.getElementById("usernameInput").value = myUsername;
+}
+
+$("saveButton").addEventListener("click", ()=> {
+    let username = document.getElementById("usernameInput").value;
+    setCookie("username", username);
+    myUsername = username;
+    alert("Username saved for next video.");
+});
 function id(len){
     let result = "";
     for(let i=0;i<len;i++){
@@ -15,10 +36,20 @@ const Page = {
         `);
     },
     video:(newVideo)=>{
+        let localId = id(5);
+    
         Page.switchSrc(`
+            <button id="${localId}admin" style="position:absolute;display:none;top:0px;right:0px;">🔨</button>
             <video controls width="200">
                 <source src="${newVideo["src"]}" type="video/mp4" />
             </video>
+            <br>
+            <button id="${localId}">Share 🔗</button>
+            <br>
+            <div id="${localId}url" style="visibility:hidden;">
+            <input style="width:200px;" id="${localId}val" type="text" disabled>
+            <button id="${localId}copy">Copy Link 📃</button>
+            </div>
             <hr>
             <p style="color:black;background-color:white;border-radius:5px;padding:5px;max-width:400px;">
             <span style="font-size:20px;">${newVideo["title"]}</span><br>
@@ -29,23 +60,51 @@ const Page = {
             Views: ${newVideo["views"]}
             </span>
             </p>
-        `)
-    }
+        `);
+        setTimeout(() => {
+            $(localId+"val").value = location.href + "video?id="+newVideo["id"].replace("#","");
+            $(localId).onclick =()=>{ $(localId+"url").style.visibility="visible";}
+            $(localId+"copy").onclick =()=>{
+                let copiz = $(localId+"val");
+                copiz.select();
+                let cc = copiz.value;
+                if(cc.includes("?video="))cc = cc.substring(0,cc.indexOf("?video="))+ "?video="+newVideo["id"].replace("#","");
+                copiz.setSelectionRange(0, 99999); // For mobile devices
+                navigator.clipboard.writeText(cc);
+                alert("URL copied!");
+            }
+        },100);
+    },
 }
 socket.on("home",data=>{
     console.log(data);
+     $("content").innerHTML = "";
+    Page.switchSrc($("trending").innerHTML);
+     $("content").innerHTML = $("content").innerHTML.replaceAll("<h1>Loading...</h1>","");
     let queue = 0;
     let row = 1;
-    data.forEach(video => {
+    data.most.forEach(video => {
         queue++;
+        let localId = video["id"].substring(1,video["id"].length); 
+        if(queue > 2){queue = 1; row++;}
         if($('trending_'+row) == null){
             $("content").insertAdjacentHTML('beforeend',`
                 <div class="menu thumbs" id="trending_${row}">
+                <div class="thumbnail" id="${localId}">
+                    <img class="thumbcont" src="${video["thumbnail"]}" width="100" height="56">
+                    <p>
+                    <span class="title">${video["title"]}</span>
+                    <br>
+                    <span class="author">${video["author"]}</span>
+                    <br>
+                    <span class="author">Views: ${video["views"]}</span>
+                    </p>
+                </div>
                 </div>
             `);
-        }
-        if(queue > 2){queue=0;row++;}
-        let localId = video["id"].substring(1,video["id"].length);
+             setTimeout(() => {$(localId).onclick = () => {Page.video(video);socket.emit("goto",video["id"]);}},100);
+        } else {
+        
             $('trending_'+row).insertAdjacentHTML('beforeend',`
                 <div class="thumbnail" id="${localId}">
                     <img class="thumbcont" src="${video["thumbnail"]}" width="100" height="56">
@@ -58,26 +117,82 @@ socket.on("home",data=>{
                     </p>
                 </div>
             `);
-            setTimeout(() => {$(localId).onclick = () => {Page.video(video);socket.emit("goto",video["id"]);}},100);
+             setTimeout(() => {$(localId).onclick = () => {Page.video(video);socket.emit("goto",video["id"]);}},100);
+        }
+    });
+    data.new = data.new.slice(0,10);
+    data.new.forEach(video => {
+        queue++;
+        let localId = video["id"].substring(1,video["id"].length); 
+        if(queue > 2){queue = 1; row++;}
+        if($('newest_'+row) == null){
+            $("newer").insertAdjacentHTML('beforeend',`
+                <div class="menu thumbs" id="newest_${row}">
+                <div class="thumbnail" id="${localId}">
+                    <img class="thumbcont" src="${video["thumbnail"]}" width="100" height="56">
+                    <p>
+                    <span class="title">${video["title"]}</span>
+                    <br>
+                    <span class="author">${video["author"]}</span>
+                    <br>
+                    <span class="author">Views: ${video["views"]}</span>
+                    </p>
+                </div>
+                </div>
+            `);
+             setTimeout(() => {$(localId).onclick = () => {Page.video(video);socket.emit("goto",video["id"]);}},100);
+        } else {
+        
+            $('newest_'+row).insertAdjacentHTML('beforeend',`
+                <div class="thumbnail" id="${localId}">
+                    <img class="thumbcont" src="${video["thumbnail"]}" width="100" height="56">
+                    <p>
+                    <span class="title">${video["title"]}</span>
+                    <br>
+                    <span class="author">${video["author"]}</span>
+                    <br>
+                    <span class="author">Views: ${video["views"]}</span>
+                    </p>
+                </div>
+            `);
+             setTimeout(() => {$(localId).onclick = () => {Page.video(video);socket.emit("goto",video["id"]);}},100);
+        }
     });
 });
+socket.on("recommend",data=>{
+
+});
+socket.on("err",data=>alert("Upload ERROR: "+data));
+socket.on("uploadsucceed",data=>{
+    alert("Upload success!");
+    socket.emit("home",{user:"Anonymous"});
+});
+function sharedUrlCheck(){
+    if(location.href.includes("?video="))location.href=location.href.substring(
+        0,
+        location.href.indexOf("?video=")
+    );
+}
 $("gethome").onclick = () => {
-    Page.switchSrc($("trending").innerHTML);
+    sharedUrlCheck();
     socket.emit("home",{user:"Anonymous"});
 }
 $("getupload").onclick = () => {
+    sharedUrlCheck();
     Page.switchSrc($("createvideo").innerHTML);
     setTimeout(() => {
         $("uploadvideo").onclick = () => {
             socket.emit("upload",{
                 title:$("newtitle").value,
                 author:$("newauthor").value,
-                src:$("newvideo").value,
-                thumbnail:$("newthumbnail").value
+                src:$("newvideo").value.trim(" "),
+                thumbnail:$("newthumbnail").value.trim(" ")
             });
         }
-    },200);
+        $("newauthor").value=myUsername;
+    },3000);
 }
+Page.switchSrc($("trending").innerHTML);
 socket.emit("home",{user:"Anonymous"});
 if(location.href.substring(0,location.href.length-10).endsWith("?video=")){
     setTimeout(() => {

@@ -13,7 +13,7 @@
             background-size:cover;
             background-attachment: fixed;
             background-repeat:no-repeat;
-            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family:sans-serif;
         }
         .menu {
             display:flex;
@@ -27,7 +27,7 @@
             z-index:9999;
             left:0px;top:0px;
             width:100%;
-            height:10%;
+            height:60px;
             border:1px solid rgb(123, 123, 123);
             border-radius:10px;
             background: #bdbdbd;
@@ -36,7 +36,7 @@ background: linear-gradient(180deg, rgba(189, 189, 189, 1) 0%, rgba(129, 119, 14
         button {
             border:1px solid rgb(125, 125, 125);
             border-radius:8px;
-            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: sans-serif;
             background: #bfa9d4;
 background: linear-gradient(0deg, rgba(191, 169, 212, 1) 0%, rgba(77, 46, 120, 1) 19%, rgba(134, 77, 191, 1) 56%, rgba(166, 108, 217, 1) 57%, rgba(252, 252, 252, 1) 100%);
             height:90%;
@@ -59,7 +59,7 @@ background: linear-gradient(0deg, rgba(191, 169, 212, 1) 0%, rgba(77, 46, 120, 1
         }
         #content {
             position:absolute;
-            top:15%;
+            top:80px;
         }
         .thumbnail {
             display:flex;
@@ -70,7 +70,8 @@ background: linear-gradient(0deg, rgba(191, 169, 212, 1) 0%, rgba(77, 46, 120, 1
             border-radius:3px;
             padding:2px;
             align-items: center;
-            min-width:169px;
+            min-width:168px;
+            max-width:169px;
         }
         .thumbnail:hover{
             color:#1d1d1d;
@@ -93,13 +94,20 @@ background: linear-gradient(0deg, rgba(191, 169, 212, 1) 0%, rgba(77, 46, 120, 1
             width:200px;
             height:32px;
         }
+        .flex-row {
+            display: flex;
+        }
     </style>
 </head>
 <body>
     <div class="main menu">
         <img src="./img/logo.png" width="100" height="auto">
         <button id="gethome">All Videos</button>
-        <button id="getupload">Create Video</button> 
+        <button id="getupload">Create Video</button>
+        <div class="flex-row">
+        <input type="text" id="usernameInput" style="width:80px;" placeholder="Username">
+        <button id="saveButton">Save</button>
+    </div>
     </div>
     <div class="thumbnail" style="display:none;" id="thumbnail">
         <img class="thumbcont" src="https://files.catbox.moe/e36wsh.png" width="100" height="56">
@@ -109,20 +117,23 @@ background: linear-gradient(0deg, rgba(191, 169, 212, 1) 0%, rgba(77, 46, 120, 1
         </p>
     </div>
     <div class="template" id="trending">
-       <p style="font-size:14px;">Welcome to BonziTUBE!</p>
+        <div style="position:absolute;right: -6px;top: 0%;background-color:black;width: 2px;height:100%;"></div>
+        <div style="position:absolute;right:-10px;top:0px;width:1%;" placeid="newer">
+            <img src="./img/new.png" width="85" height="45">
+        </div>
+        <marquee>rebrand.ly/BonziTUBE</marquee>
+        <div style="position:relative;right:338px;width:20px;height:50%;background-color: black;"></div>
+        <p style="font-size:14px;">Welcome to BonziTUBE! By using the site you agree to the rules here: <a href="/rules.html">Rules</a></button></p>
         <hr>
         <p>Most Viewed</p> 
-        <div class="menu thumbs" placeid="trending_1">
-        </div>
-        <div class="menu thumbs" placeid="trending_2"></div>
-        <div class="menu thumbs" placeid="trending_3"></div>
+        <hr>
+        <h1>Loading...</h1>
     </div>
     <div class="template" id="createvideo">
         <p style="max-width:300px;">
-            BonziTUBE uses catbox.moe's external
-            media uploads to help keep BonziTUBE operating.
-            Use catbox.moe for thumbnails, and your videos, then
-            copy the links from there.
+            BonziTUBE uses catbox.moe to help keep BonziTUBE operating.
+            Upload your videos and thumbnails to catbox.moe then copy and paste
+            the links you're given there
         </p>
         <button onclick="window.open('https://catbox.moe')">Catbox</button>
         <br>
@@ -136,13 +147,11 @@ background: linear-gradient(0deg, rgba(191, 169, 212, 1) 0%, rgba(77, 46, 120, 1
         <button placeid="uploadvideo">Upload Video</button>
     </div>
     <div id="content">
-        <p style="font-size:14px;">Welcome to BonziTUBE!</p>
-        <hr>
-        <p>Most Viewed</p>
-        <div class="menu thumbs" id="trending_1">
+        <div style="position:absolute;right:-100%;top:0px;width:30%;">
+            
         </div>
-        <div class="menu thumbs" id="trending_2"></div>
-        <div class="menu thumbs" id="trending_3"></div>
+        <marquee>rebrand.ly/BonziTUBE</marquee>
+        <h1>Loading...</h1>
     </div>
     <script defer src="script.js"></script>
 </body>

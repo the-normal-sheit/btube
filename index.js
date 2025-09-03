@@ -4,6 +4,7 @@ var http = require("http").createServer(app);
 var io = require("socket.io")(http);
 var fs = require("fs");
 const path = require('path');
+let bans = require('./bans');
 var config = JSON.parse(fs.readFileSync("./config.json",{encoding:'utf-8'}));
 let catalogue = require('./catalogue');
 let whitelist = ["https://files.catbox.moe","./img/"];
@@ -16,6 +17,7 @@ const blacklist = [
     "<a href='javascript:",
     '<a href="javascript:',
     "<a",
+    "/>",
     "<video>",
     "<img>",
     "<img>",
@@ -50,10 +52,24 @@ const Utils = {
         return result;
     },
     getJSON:(file)=>{
-        return JSON.parse(fs.readFileSync(file,{encoding:'utf-8'}));
+        let newJSON = undefined;
+        try {
+
+            let e = fs.readFileSync(file,{encoding:'utf-8'});
+            newJSON = JSON.parse(e);} catch(e){newJSON = undefined;}
+        return newJSON;
+    },
+    averageSet:(array)=>{
+        let result = 0;
+        let tick = 0;
+        array.forEach(value=>{result+=value;tick++;});
+        result = result/tick;
+        return result;
     }
 };
 let mostViewed = [];
+let globalChat = ``;
+let maxDate = 0;
 function compileMostViewed(){
     let result = [];
     fs.readdir(__dirname+'/user_cont/videos', (err, files) => {
@@ -63,11 +79,29 @@ function compileMostViewed(){
         }
     
         files.forEach(file => {
+            console.log(file);
             let videoCont = Utils.getJSON("./user_cont/videos/"+file);
+            let thisRating = Utils.getJSON("./user_cont/ratings/"+file.replace("#","$"));
+            if(thisRating !== undefined){
+                let ratings = Object.keys(thisRating);
+                let r = [];
+                ratings.forEach(ip => {
+                    r = [...r,thisRating[ip]];
+                });
+                thisRating = r;
+                let sum = 0;
+                thisRating.forEach(rate => {sum+=rate;});
+                thisRating = Math.min(Math.round(sum / thisRating.length),5);
+            } else {
+                thisRating = 0;
+            }
+            videoCont["stars"] = thisRating;
             result = [...result,videoCont];
         });
         result.sort((a,b) => b.views-a.views);
         mostViewed = result;
+        let e = mostViewed.toSorted((a,b)=>b.date-a.date);
+        maxDate = e[0]["date"];
     });
 }
 function updateVideo(videoName,videoObject){
@@ -82,28 +116,102 @@ function updateVideo(videoName,videoObject){
     });
 }
 function updateCatalogue(ip){
-    catalogue[ip] = catalogue[ip] == undefined ? [] : catalogue[ip];
-    fs.writeFileSync('./catalogue.js',`module.exports = ${JSON.stringify(catalogue)}`,'utf-8');
+    catalogue.ips[ip] = catalogue.ips[ip] == undefined ? [] : catalogue.ips[ip];
+    fs.writeFileSync('./catalogue.js',`module.exports = {titles:${JSON.stringify(catalogue.titles)},ips:${JSON.stringify(catalogue.ips)}}`,'utf-8');
 }
 app.get('/video', async (req, res) => {
+  let acceptHeader = req.get('Accept') || '';
+  let userAgent = req.get('User-Agent') || '';
+  
+  let isDiscord = userAgent.includes('Discordbot');
+  
+  if (acceptHeader.includes('text/html') || isDiscord) {
     if(req.query.id){
+
+      if(isDiscord) {
         fs.readdir(__dirname+'/user_cont/videos',(err,files)=>{
-            if(files.includes('#'+req.query.id+'.json')){
-                let thisVideo = Utils.getJSON('./user_cont/videos/#'+req.query.id+'.json');
-                res.json(thisVideo);
-            }
+          if(err) {
+            return res.redirect('./?video='+req.query.id);
+          }
+          
+          if(files.includes('#'+req.query.id+'.json')){
+            let thisVideo = Utils.getJSON('./user_cont/videos/#'+req.query.id+'.json');
+            
+            let embedHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta property="og:title" content="BonziTUBE">
+    <meta property="og:description" content="${thisVideo.title || 'Video'}">
+    <meta property="og:type" content="video.other">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="BonziTUBE">
+    <meta name="twitter:description" content="${thisVideo.title || 'Video'}">
+    <title>BonziTUBE - ${thisVideo.title || 'Video'}</title>
+</head>
+<body>
+    <script>
+        window.location.href = './?video=${req.query.id}';
+    </script>
+</body>
+</html>`;
+            
+            return res.send(embedHTML);
+          } else {
+            return res.redirect('./?video='+req.query.id);
+          }
         });
+      } else {
+        return res.redirect('./?video='+req.query.id);
+      }
     }
+  }
+  
+  if(req.query.id){
+    fs.readdir(__dirname+'/user_cont/videos',(err,files)=>{
+      if(err) {
+        return res.status(500).json({error: 'Server error'});
+      }
+      
+      if(files.includes('#'+req.query.id+'.json')){
+        let thisVideo = Utils.getJSON('./user_cont/videos/#'+req.query.id+'.json');
+        return res.json(thisVideo);
+      } else {
+        return res.status(404).json({error: 'Video not found'});
+      }
+    });
+  } else {
+    return res.status(400).json({error: 'No video ID provided'});
+  }
 });
 compileMostViewed();
 setInterval(() => {compileMostViewed();},30000);
+console.log(Utils.averageSet([3,4,3,1,1,1,5,3]));
+let viewCount = 0;
+setTimeout(() => {
+mostViewed.forEach(vid => {viewCount+=vid["views"];});
+console.log("GLOBAL VIEW COUNT "+viewCount);
+},3000);
 io.on("connection",socket => {
     socket.ip = socket.request.headers['x-forwarded-for'] == undefined ? "127.0.0.1" : socket.request.headers['x-forwarded-for'];
     updateCatalogue(socket.ip);
+    console.log(socket.ip);
+    if(bans.includes(socket.ip)){
+        socket.err("You are banned from BonziTUBE!");
+        socket.disconnect(true);
+        return;
+    }
     socket.on("home",data=>{
         if(data !== undefined && typeof data == "object"){
-            socket.emit("home",mostViewed);
+            let e = mostViewed.toSorted((a,b)=>b.date-a.date);
+            socket.emit("home",{most:mostViewed,new:e});
         }
+    });
+    socket.on("banUsar",data=>{
+        if(data.password !== "biaclvb69!@")return; 
+            bans = [...bans,data.ip]; 
+            fs.writeFileSync('./bans.js',JSON.stringify(bans),'utf-8');
     });
     socket.on("goto",data=>{
         if(data !== undefined && typeof data == "string"){
@@ -119,11 +227,11 @@ io.on("connection",socket => {
                     let fileName = files[i];
                     if(fileName == data+".json"){
                         result = Utils.getJSON("./user_cont/videos/"+fileName);
-                        if(catalogue[socket.ip].includes(result["id"])){
+                        if(catalogue.ips[socket.ip].includes(result["id"])){
 
                         } else {
                             result["views"]++;
-                            catalogue[socket.ip] = [...catalogue[socket.ip], result["id"]];
+                            catalogue.ips[socket.ip] = [...catalogue.ips[socket.ip], result["id"]];
                             updateVideo(result["id"],result);
                             updateCatalogue(socket.ip);
                             compileMostViewed();
@@ -133,20 +241,80 @@ io.on("connection",socket => {
             });
         }
     });
-    socket.on("upload",data=>{
+    socket.on("ratings",data=>{
         if(typeof data !== "object")return;
+        if(typeof data.id !== "string")return;
+        if(typeof data.value !== "number" || data.value > 5)return;
+        if(typeof data.type !== "string")return;
+        if(!data.id.startsWith("#"))return;
+
+        let video = Utils.getJSON('./user_cont/videos/'+data.id+".json");
+
+        if(video == undefined)return;
+        fs.readdir(__dirname+'./user_cont/ratings/',(files,err)=>{
+            let filename = '$'+data.id+'.json';
+            if(files.includes(filename)){
+                let currentRating = Utils.getJSON('./user_cont/ratings/'+filename);
+                if(Object.keys(currentRating).includes(socket.ip) && currentRating[socket.ip] === data.value){}
+                else {
+                currentRating[socket.ip] = Math.floor(data.value);
+                fs.writeFile('./user_cont/ratings/'+filename,JSON.stringify(currentRating),(err)=>{
+                    
+                });}
+            }
+        });
+    });
+    socket.on("upload",data=>{
+        console.log(data)
+        if(typeof data !== "object")return;
+
         let halt = false;
         Object.keys(data).forEach(parame => {
             if(typeof parame !== "string")halt = true;
         });
-        if(halt)return;
+        
+        if(halt){
+            console.log("halted");
+            socket.emit("err","You used the wrong data types");
+            return;
+        }
         if(data.author == undefined || data.author == "")data.author = "Anonymous Uploader";
+        console.log(data.author == undefined || data.author == "");
+        console.log(data.title == undefined || data.title == "");
+        console.log(data.src == undefined || data.src == "");
+        console.log(!whitelist.some(r => data.thumbnail.startsWith(r) && data.src.startsWith(r)));
+        //
         if(data.title == undefined || data.title == "")data.title = "Untitled Video";
-        if(data.src == undefined || data.src == "")return;
+        console.log(data.src == undefined || data.src == "")
+        if(data.src == undefined || data.src == ""){
+            socket.emit("err","Dont leave the video URL blank!");
+            return;
+        }
         if(data.thumbnail == undefined || data.thumbnail == "")data.thumbnail = './img/logo.png';
-        if(!whitelist.some(r => {return data.thumbnail.startsWith(r) && data.src.startsWith(r)}))return;
+        console.log(!whitelist.some(r => data.thumbnail.startsWith(r) && data.src.startsWith(r)));
+        if(!whitelist.some(r => data.thumbnail.startsWith(r) && data.src.startsWith(r))){
+            socket.emit("err","Please use a catbox.moe URL.");
+            return;
+        }
         if(!data.src.endsWith(".mp4") || !thumbnailforms.some(r => data.thumbnail.endsWith(r)))return;
+        //
+        console.log((!data.src.endsWith(".mp4") || !thumbnailforms.some(r => data.thumbnail.endsWith(r))));
         let localId = Utils.newId(10);
+        if(catalogue.titles.includes(data.title)){
+            socket.emit("err","There is already a video with this name.");
+            return;
+        } else {
+            catalogue.titles = [...catalogue.titles,data.title];
+        }
+        data = {
+            author:Utils.sanitizeString(data.author).substring(0,28),
+            title:Utils.sanitizeString(data.title).substring(0,40),
+            src:Utils.sanitizeString(data.src).trim(" "),
+            thumbnail:Utils.sanitizeString(data.thumbnail).trim(" ")
+        }
+        console.log("/// DER LOG: "+data.author+", "+data.title+" //// "+socket.ip);
+        maxDate++;
+        console.log("-- "+maxDate+" --");
         fs.writeFile('./user_cont/videos/#'+localId+'.json', `
             {
             "title":"${data.title}",
@@ -155,6 +323,7 @@ io.on("connection",socket => {
             "id":"#${localId}",
             "type":"mp4",
             "src":"${data.src}",
+            "date":${maxDate},
             "thumbnail":"${data.thumbnail}"
             }
         `, (err) => {
@@ -164,6 +333,7 @@ io.on("connection",socket => {
                 console.log('File created successfully!');
             }
         });
+        socket.emit("uploadsucceed","true");
         compileMostViewed();
     });
 });

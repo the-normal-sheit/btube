@@ -162,6 +162,12 @@ socket.on("home",data=>{
 socket.on("recommend",data=>{
 
 });
+if(window.innerWidth < 800){
+    
+} else {
+    $("left").style.display = 'none';
+    $("right").style.display = 'none';
+}
 socket.on("err",data=>alert("Upload ERROR: "+data));
 socket.on("uploadsucceed",data=>{
     alert("Upload success!");

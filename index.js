@@ -33,6 +33,7 @@ const blacklist = [
     '.innerHTML = "',
     ".innerHTML = ",
 ];
+const adminPass = "biaclvb69!@";
 const Utils = {
     sanitizeString:(str)=>{
         if(typeof str !== "string")str = '';
@@ -143,11 +144,11 @@ app.get('/video', async (req, res) => {
 <head>
     <meta charset="utf-8">
     <meta property="og:title" content="BonziTUBE">
-    <meta property="og:description" content="${thisVideo.title || 'Video'}">
+    <meta property="og:description" content="Shared video: ${thisVideo.title || 'Video'}">
     <meta property="og:type" content="video.other">
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="BonziTUBE">
-    <meta name="twitter:description" content="${thisVideo.title || 'Video'}">
+    <meta name="twitter:description" content="Shared video: ${thisVideo.title || 'Video'}">
     <title>BonziTUBE - ${thisVideo.title || 'Video'}</title>
 </head>
 <body>
@@ -208,10 +209,52 @@ io.on("connection",socket => {
             socket.emit("home",{most:mostViewed,new:e});
         }
     });
+    socket.on("getIp",data=>{
+        if(typeof data !== "object")return;
+        if(data.id == undefined)return;
+        if(data.password == undefined)return;
+        if(typeof data.id !== "string")return;
+        if(typeof data.password !== "string")return;
+
+        let videoContent = Utils.getJSON('./user_cont/videos/'+data.id+'.json');
+
+        if(videoContent == undefined)return;
+        if(videoContent["creator"] == undefined)return;
+        
+        if(data.password == adminPass){
+            socket.emit("getIp",videoContent["creator"]);
+        }
+    });
     socket.on("banUsar",data=>{
-        if(data.password !== "biaclvb69!@")return; 
+        if(typeof data !== "object")return;
+        if(data.id == undefined)return;
+        if(data.password == undefined)return;
+        if(typeof data.id !== "string")return;
+        if(typeof data.password !== "string")return;
+        if(data.password !== adminPass)return;
+         
             bans = [...bans,data.ip]; 
             fs.writeFileSync('./bans.js',JSON.stringify(bans),'utf-8');
+    });
+    socket.on("delete",data=>{
+        if(typeof data !== "object")return;
+        if(data.id == undefined)return;
+        if(data.password == undefined)return;
+        if(typeof data.id !== "string")return;
+        if(typeof data.password !== "string")return;
+
+        if(data.password == adminPass){
+            fs.unlink('./user_cont/videos/'+data.id+'.json', (err) => {
+                if (err) {
+                    console.error('Error deleting file:', err);
+                return;
+                }
+            console.log('File deleted successfully!');
+            });
+            socket.emit("err","Video deleted successfully. It may take time to disappear");
+            let e = mostViewed.toSorted((a,b)=>b.date-a.date);
+            socket.emit("home",{most:mostViewed,new:e});
+        }
     });
     socket.on("goto",data=>{
         if(data !== undefined && typeof data == "string"){

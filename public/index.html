@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=2.0">
     <title>BonziTUBE</title>
     <link rel="icon" href="./img/icon.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.0/socket.io.js"></script>
@@ -120,15 +120,17 @@ background: linear-gradient(0deg, rgba(191, 169, 212, 1) 0%, rgba(77, 46, 120, 1
         <div style="position:absolute;right: -6px;top: 0%;background-color:black;width: 2px;height:100%;"></div>
         <div style="position:absolute;right:-10px;top:0px;width:1%;" placeid="newer">
             <img src="./img/new.png" width="85" height="45">         
-            <button onload="this.isMobile = () => {if(!window.matchMedia('only screen and (max-width: 768px)').matches)this.style.display='none';}; this.isMobile();" onresize="this.isMobile()" onclick="window.scrollTo(999,0);">
-                <img width="32" height="32" src="./img/go_right.png">
+            <button id="left" onclick="setTimeout(() => window.scrollTo(0,0), 100);">
+                <img width="32" height="32" style="transform:scaleX(-1)" src="./img/go_right.png">
             </button>
 
         </div>
         <marquee>rebrand.ly/BonziTUBE</marquee>
         <div style="position:relative;right:338px;width:20px;height:50%;background-color: black;"></div>
         <p style="font-size:14px;">Welcome to BonziTUBE! By using the site you agree to the rules here: <a href="/rules.html">Rules</a></button></p>
-        <button onclick="window.scrollTo(999,0);"><img width="32" height="32" src="./img/go_right.png"></button>
+        <button id="right" onclick="setTimeout(() => window.scrollTo(999,0), 100);">
+                <img width="32" height="32" src="./img/go_right.png">
+        </button>
         <hr>
         <p>Most Viewed</p> 
         <hr>

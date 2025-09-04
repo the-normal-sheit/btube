@@ -46,6 +46,7 @@ const Page = {
             </video>
             <br>
             <button id="${localId}">Share 🔗</button>
+            <button id="${localId}delete">🗑️</button>
             <br>
             <div id="${localId}url" style="visibility:hidden;">
             <input style="width:200px;" id="${localId}val" type="text" disabled>
@@ -59,6 +60,9 @@ const Page = {
             </span><br>
             <span style="font-size:14px;color:gray;text-shadow:1px 1px 1px rgba(0,0,0,0.3);">
             Views: ${newVideo["views"]}
+            <br>
+            <span style="font-size:14px;color:gray;text-shadow:1px 1px 1px rgba(0,0,0,0.3);">
+            Upload date: ${newVideo["timestamp"] == "Unknown" ? "Before time stamp update" : newVideo["timestamp"]}
             </span>
             </p>
         `);
@@ -74,10 +78,14 @@ const Page = {
                 navigator.clipboard.writeText(cc);
                 alert("URL copied!");
             }
+            $(localId+"delete").onclick = () => {
+                let pass = prompt("Admin password for video deletion?") || "none";
+                socket.emit("delete",{id:newVideo["id"],password:pass});
+            }
         },100);
     },
 }
-
+socket.on("alert",data=>{alert(data);});
 socket.on("home",data=>{
     console.log(data);
      $("content").innerHTML = "";
@@ -181,6 +189,10 @@ function sharedUrlCheck(){
 $("gethome").onclick = () => {
     sharedUrlCheck();
     socket.emit("home",{user:"Anonymous"});
+}
+$("getChat").onclick = () => {
+    sharedUrlCheck();
+    Page.switchSrc($("bulletinBoard").innerHTML);
 }
 $("getupload").onclick = () => {
     sharedUrlCheck();

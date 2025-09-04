@@ -97,6 +97,19 @@ background: linear-gradient(0deg, rgba(191, 169, 212, 1) 0%, rgba(77, 46, 120, 1
         .flex-row {
             display: flex;
         }
+        .chatwindow {
+            background-color: #8e45d2;
+            width:400px;
+            height:300px;
+            overflow-x:hidden;
+            overflow-y:scroll;
+        }
+        .msg {
+            background-color: rgb(255, 245, 185);
+            border-radius:5px;
+            text-shadow:2px 2px 2px rgba(0,0,0,0.2);
+            max-width:200px;
+        }
     </style>
 </head>
 <body>
@@ -104,6 +117,7 @@ background: linear-gradient(0deg, rgba(191, 169, 212, 1) 0%, rgba(77, 46, 120, 1
         <img src="./img/logo.png" width="100" height="auto">
         <button id="gethome">All Videos</button>
         <button id="getupload">Create Video</button>
+        <button id="getChat" style="display:none;">💬 Chat</button>
         <div class="flex-row">
         <input type="text" id="usernameInput" style="width:80px;" placeholder="Username">
         <button id="saveButton">Save</button>
@@ -151,6 +165,22 @@ background: linear-gradient(0deg, rgba(191, 169, 212, 1) 0%, rgba(77, 46, 120, 1
         <p class="videofront">Most Viewed</p> 
         <hr class="videofront">
         <h1>Loading...</h1>
+    </div>
+    <div class="template" id="bulletinBoard">
+        <button placeid="avatarchange" style="filter:grayscale(1);">Avatar/PFP</button>
+        <div class="chatwindow" placeid="chatcontent">
+            <div class="msg">
+                <p>
+                    <span style="color:black;"><img src="./img/guest.png"> Guest:</span>
+                    <br>
+                    <span style="color:rgb(45, 45, 45);">Hello nignogs me jow</span>
+                </p>
+            </div>
+        </div>
+        <div class="flex-row" style="align-items: center;">
+            <button placeid="sendmessage">Send</button>
+            <input style="height:30px;width:200px;" type="text" placeholder="Enter a message...">
+        </div>
     </div>
     <div class="template" id="createvideo">
         <p style="max-width:300px;">

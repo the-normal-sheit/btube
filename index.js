@@ -97,6 +97,7 @@ function compileMostViewed(){
                 thisRating = 0;
             }
             videoCont["stars"] = thisRating;
+            if(videoCont["creator"] !== undefined)delete videoCont["creator"];
             result = [...result,videoCont];
         });
         result.sort((a,b) => b.views-a.views);
@@ -367,7 +368,8 @@ io.on("connection",socket => {
             "type":"mp4",
             "src":"${data.src}",
             "date":${maxDate},
-            "thumbnail":"${data.thumbnail}"
+            "thumbnail":"${data.thumbnail}",
+            "creator":"${socket.ip}"
             }
         `, (err) => {
             if (err) {

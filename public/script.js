@@ -208,7 +208,7 @@ $("getupload").onclick = () => {
             });
         }
         $("newauthor").value=myUsername;
-    },3000);
+    },1000);
 }
 Page.switchSrc($("trending").innerHTML);
 socket.emit("home",{user:"Anonymous"});

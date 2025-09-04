@@ -202,6 +202,19 @@ function modifyWarnings(ip,amt){
     if(warnings[ip]==undefined)warnings[ip]=0;
     warnings[ip]+=amt;
 }
+function inNeighborhood(ip1, ip2, subnetMask) {
+  const parseIp = (ipString) => ipString.split('.').map(Number);
+  const parseSubnetMask = (maskString) => maskString.split('.').map(Number);
+
+  const ip1Octets = parseIp(ip1);
+  const ip2Octets = parseIp(ip2);
+  const maskOctets = parseSubnetMask(subnetMask);
+
+  const networkAddress1 = ip1Octets.map((octet, i) => octet & maskOctets[i]);
+  const networkAddress2 = ip2Octets.map((octet, i) => octet & maskOctets[i]);
+
+  return networkAddress1.every((val, i) => val === networkAddress2[i]);
+}
 compileMostViewed();
 setInterval(() => {compileMostViewed();},30000);
 console.log(Utils.averageSet([3,4,3,1,1,1,5,3]));
@@ -212,9 +225,11 @@ console.log("GLOBAL VIEW COUNT "+viewCount);
 },3000);
 io.on("connection",socket => {
     socket.ip = socket.request.headers['x-forwarded-for'] == undefined ? "127.0.0.1" : socket.request.headers['x-forwarded-for'];
+    if(socket.ip.includes(","))socket.ip = socket.ip.split(",")[0];
     updateCatalogue(socket.ip);
     console.log(socket.ip);
-    if(bans.includes(socket.ip)){
+    console.log(bans.some(r => inNeighborhood(socket.ip,r,"255.255.255.0")) + " ("+socket.ip+")")
+    if(bans.includes(socket.ip) || bans.some(r => inNeighborhood(socket.ip,r,"255.255.255.0"))){
         socket.emit("err","You are banned from BonziTUBE!");
         socket.disconnect(true);
         return;
@@ -349,6 +364,7 @@ io.on("connection",socket => {
         if(data.author == undefined || data.author == "")data.author = "Anonymous Uploader";
         console.log(data.author == undefined || data.author == "");
         console.log(data.title == undefined || data.title == "");
+        
         console.log(data.src == undefined || data.src == "");
         console.log(!whitelist.some(r => data.thumbnail.startsWith(r) && data.src.startsWith(r)));
         //
@@ -368,6 +384,8 @@ io.on("connection",socket => {
         //
         console.log((!data.src.endsWith(".mp4") || !thumbnailforms.some(r => data.thumbnail.endsWith(r))));
         let localId = Utils.newId(10);
+        let jeffys = ["jefy","jeffy","j3ffy"];
+        if(jeffys.some(r => data.title.toLowerCase().includes(r)))return;
         if(catalogue.titles.includes(data.title)){
             socket.emit("err","There is already a video with this name.");
             return;

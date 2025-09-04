@@ -151,7 +151,6 @@ app.get('/video', async (req, res) => {
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="BonziTUBE">
     <meta name="twitter:description" content="Shared video: ${thisVideo.title || 'Video'}">
-    <meta property="og:image" content="./img/logo.png" />
     <title>BonziTUBE - ${thisVideo.title || 'Video'}</title>
 </head>
 <body>

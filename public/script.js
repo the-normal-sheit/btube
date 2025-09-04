@@ -31,6 +31,7 @@ function id(len){
 const Page = {
     switchSrc:(newHTML)=>{
         $("content").innerHTML = "";
+        $('content').style.left='0px';
         $("content").insertAdjacentHTML('beforeend',`
             ${newHTML.replaceAll("placeid=","id=")}
         `);
@@ -89,7 +90,7 @@ socket.on("home",data=>{
         if(queue > 2){queue = 1; row++;}
         if($('trending_'+row) == null){
             $("content").insertAdjacentHTML('beforeend',`
-                <div class="menu thumbs" id="trending_${row}">
+                <div class="menu thumbs videofront" id="trending_${row}">
                 <div class="thumbnail" id="${localId}">
                     <img class="thumbcont" src="${video["thumbnail"]}" width="100" height="56">
                     <p>

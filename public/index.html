@@ -117,27 +117,39 @@ background: linear-gradient(0deg, rgba(191, 169, 212, 1) 0%, rgba(77, 46, 120, 1
         </p>
     </div>
     <div class="template" id="trending">
-        <div style="position:absolute;right: -6px;top: 0%;background-color:black;width: 2px;height:100%;"></div>
+        <div style="position:absolute;right: -6px;top: 0%;background-color:black;width: 2px;height:100%;" class="videofront"></div>
         <div style="position:absolute;right:-10px;top:0px;width:1%;" placeid="newer">
             <img src="./img/new.png" width="85" height="45">         
-            <button id="left" onclick="setTimeout(() => window.scrollTo(0,0), 500);">
+            <button id="left" onclick="
+            let q = document.getElementsByClassName('videofront');
+        for(let i=0;i<q.length;i++){
+            q[i].style.visibility = 'visible';
+        }
+        let n = document.getElementById('newer');
+        n.style.left = 'initial';
+        n.style.right = '-10px';
+            ">
                 <img width="32" height="32" style="transform:scaleX(-1)" src="./img/go_right.png">
             </button>
 
         </div>
-        <marquee>rebrand.ly/BonziTUBE</marquee>
-        <div style="position:relative;right:338px;width:20px;height:50%;background-color: black;"></div>
-        <p style="font-size:14px;">Welcome to BonziTUBE! By using the site you agree to the rules here: <a href="/rules.html">Rules</a></button></p>
-        <button id="right" onclick="setTimeout(function () { window.scroll({
-    top: 0,
-    left: 999,
-    behavior: 'smooth'
-}); }, 100);">
+        <marquee class="videofront">rebrand.ly/BonziTUBE</marquee>
+        <div class="videofront" style="position:relative;right:338px;width:20px;height:50%;background-color: black;"></div>
+        <p class="videofront" style="font-size:14px;">Welcome to BonziTUBE! By using the site you agree to the rules here: <a href="/rules.html">Rules</a></button></p>
+        <button id="right" class="videofront" onclick="
+        let r = document.getElementsByClassName('videofront');
+        for(let i=0;i<r.length;i++){
+            r[i].style.visibility = 'hidden';
+        }
+        let n = document.getElementById('newer');
+        n.style.left = '0px';
+        n.style.right = 'initial';
+        ">
                 <img width="32" height="32" src="./img/go_right.png">
         </button>
-        <hr>
-        <p>Most Viewed</p> 
-        <hr>
+        <hr class="videofront">
+        <p class="videofront">Most Viewed</p> 
+        <hr class="videofront">
         <h1>Loading...</h1>
     </div>
     <div class="template" id="createvideo">
@@ -158,10 +170,7 @@ background: linear-gradient(0deg, rgba(191, 169, 212, 1) 0%, rgba(77, 46, 120, 1
         <button placeid="uploadvideo">Upload Video</button>
     </div>
     <div id="content">
-        <div style="position:absolute;right:-100%;top:0px;width:30%;">
-            
-        </div>
-        <marquee>rebrand.ly/BonziTUBE</marquee>
+        <marquee class="videofront">rebrand.ly/BonziTUBE</marquee>
         <h1>Loading...</h1>
     </div>
     <script defer src="script.js"></script>

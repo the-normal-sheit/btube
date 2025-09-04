@@ -190,8 +190,18 @@ app.get('/video', async (req, res) => {
     return res.status(400).json({error: 'No video ID provided'});
   }
 }
-catch(e){console.log(e);}
+catch(e){}
 });
+let uses = {};
+let warnings = {};
+function modifyUses(ip,amt){
+    if(uses[ip]==undefined)uses[ip]=0;
+    uses[ip]+=amt;
+}
+function modifyWarnings(ip,amt){
+    if(warnings[ip]==undefined)warnings[ip]=0;
+    warnings[ip]+=amt;
+}
 compileMostViewed();
 setInterval(() => {compileMostViewed();},30000);
 console.log(Utils.averageSet([3,4,3,1,1,1,5,3]));
@@ -314,6 +324,14 @@ io.on("connection",socket => {
         });
     });
     socket.on("upload",data=>{
+        modifyUses(socket.ip,1);
+        setTimeout(() => {modifyUses(socket.ip,-1);},config.rateLimit*uses[socket.ip]);
+        if(uses[socket.ip] > 3){
+            modifyWarnings(socket.ip,1);
+            setTimeout(() => {modifyWarnings(socket.ip,-1);},config.rateLimit*warnings[socket.ip]);
+            if(warnings[socket.ip] > 3){socket.disconnect(true);}
+            socket.emit("err","You have uploaded too much recently. Please wait a while.")
+            return;}
         console.log(data)
         if(typeof data !== "object")return;
 

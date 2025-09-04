@@ -152,6 +152,7 @@ app.get('/video', async (req, res) => {
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="BonziTUBE">
     <meta name="twitter:description" content="Shared video: ${thisVideo.title || 'Video'} - by ${thisVideo.author}">
+        <meta property="og:image" content="${thisVideo.thumbnail || 'https://bonzi-tube.onrender.com/img/logo.png'}" />
     <title>BonziTUBE</title>
 </head>
 <body>

@@ -33,6 +33,7 @@ const blacklist = [
     '.innerHTML = "',
     ".innerHTML = ",
 ];
+let msgs = [`<b>Welcome to BonziTUBE bulletin board. You can scroll down to see user messages.</b><br>`];
 const adminPass = "biaclvb69!@";
 const Utils = {
     sanitizeString:(str)=>{
@@ -80,7 +81,6 @@ function compileMostViewed(){
         }
     
         files.forEach(file => {
-            console.log(file);
             let videoCont = Utils.getJSON("./user_cont/videos/"+file);
             let thisRating = Utils.getJSON("./user_cont/ratings/"+file.replace("#","$"));
             if(thisRating !== undefined){
@@ -98,6 +98,8 @@ function compileMostViewed(){
             }
             videoCont["stars"] = thisRating;
             if(videoCont["creator"] !== undefined)delete videoCont["creator"];
+            if(videoCont["timestamp"] == undefined)videoCont["timestamp"]="Unknown";
+            console.log(videoCont);
             result = [...result,videoCont];
         });
         result.sort((a,b) => b.views-a.views);
@@ -222,6 +224,10 @@ function inNeighborhood(ip1, ip2, subnetMask) {
 
   return networkAddress1.every((val, i) => val === networkAddress2[i]);
 }
+function currentDate(){
+    let d = new Date();
+    return d.toDateString();
+}
 compileMostViewed();
 setInterval(() => {compileMostViewed();},30000);
 console.log(Utils.averageSet([3,4,3,1,1,1,5,3]));
@@ -255,7 +261,7 @@ io.on("connection",socket => {
         if(typeof data.password !== "string")return;
 
         let videoContent = Utils.getJSON('./user_cont/videos/'+data.id+'.json');
-
+        console.log(videoContent)
         if(videoContent == undefined)return;
         if(videoContent["creator"] == undefined)return;
         
@@ -290,7 +296,7 @@ io.on("connection",socket => {
                 }
             console.log('File deleted successfully!');
             });
-            socket.emit("err","Video deleted successfully. It may take time to disappear");
+            socket.emit("alert","Video deleted successfully. It may take time to disappear");
             let e = mostViewed.toSorted((a,b)=>b.date-a.date);
             socket.emit("home",{most:mostViewed,new:e});
         }
@@ -418,7 +424,8 @@ io.on("connection",socket => {
             "src":"${data.src}",
             "date":${maxDate},
             "thumbnail":"${data.thumbnail}",
-            "creator":"${socket.ip}"
+            "creator":"${socket.ip}",
+            "timestamp":"${currentDate()}"
             }
         `, (err) => {
             if (err) {

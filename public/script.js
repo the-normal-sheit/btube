@@ -77,6 +77,7 @@ const Page = {
         },100);
     },
 }
+
 socket.on("home",data=>{
     console.log(data);
      $("content").innerHTML = "";

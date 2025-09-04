@@ -251,6 +251,7 @@ io.on("connection",socket => {
          
             bans = [...bans,data.ip]; 
             fs.writeFileSync('./bans.js',JSON.stringify(bans),'utf-8');
+            console.log("Ban success!")
     });
     socket.on("delete",data=>{
         if(typeof data !== "object")return;

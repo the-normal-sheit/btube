@@ -139,7 +139,7 @@ app.get('/video', async (req, res) => {
           
           if(files.includes('#'+req.query.id+'.json')){
             let thisVideo = Utils.getJSON('./user_cont/videos/#'+req.query.id+'.json');
-            
+            if(thisVideo == undefined)return;
             let embedHTML = `
 <!DOCTYPE html>
 <html>

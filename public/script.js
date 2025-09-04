@@ -124,7 +124,7 @@ socket.on("home",data=>{
     data.new = data.new.slice(0,10);
     data.new.forEach(video => {
         queue++;
-        let localId = video["id"].substring(1,video["id"].length); 
+        let localId = video["id"].substring(1,video["id"].length) + '_2'; 
         if(queue > 2){queue = 1; row++;}
         if($('newest_'+row) == null){
             $("newer").insertAdjacentHTML('beforeend',`
@@ -159,9 +159,6 @@ socket.on("home",data=>{
              setTimeout(() => {$(localId).onclick = () => {Page.video(video);socket.emit("goto",video["id"]);}},100);
         }
     });
-});
-socket.on("recommend",data=>{
-
 });
 if(window.innerWidth < 800){
     

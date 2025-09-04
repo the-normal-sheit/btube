@@ -8,7 +8,8 @@ function setCookie(name, value, days = 30) {
 }
 
 function getCookie(name) {
-    return document.cookie.split('; ').find(row => row.startsWith(name + '='))?.split('=')[1];
+    const value = document.cookie.split('; ').find(row => row.startsWith(name + '='))?.split('=')[1];
+    return value ? decodeURIComponent(value) : undefined;
 }
 
 if (myUsername) {
@@ -41,7 +42,7 @@ const Page = {
     
         Page.switchSrc(`
             <button id="${localId}admin" style="position:absolute;display:none;top:0px;right:0px;">🔨</button>
-            <video controls width="200">
+            <video controls width="300">
                 <source src="${newVideo["src"]}" type="video/mp4" />
             </video>
             <br>

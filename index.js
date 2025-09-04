@@ -122,36 +122,37 @@ function updateCatalogue(ip){
     fs.writeFileSync('./catalogue.js',`module.exports = {titles:${JSON.stringify(catalogue.titles)},ips:${JSON.stringify(catalogue.ips)}}`,'utf-8');
 }
 app.get('/video', async (req, res) => {
-    try{
-  let acceptHeader = req.get('Accept') || '';
-  let userAgent = req.get('User-Agent') || '';
-  
-  let isDiscord = userAgent.includes('Discordbot');
-  
-  if (acceptHeader.includes('text/html') || isDiscord) {
-    if(req.query.id){
-
-      if(isDiscord) {
-        fs.readdir(__dirname+'/user_cont/videos',(err,files)=>{
-          if(err) {
-            return res.redirect('./?video='+req.query.id);
-          }
-          
-          if(files.includes('#'+req.query.id+'.json')){
-            let thisVideo = Utils.getJSON('./user_cont/videos/#'+req.query.id+'.json');
-            if(thisVideo == undefined)return;
-            let embedHTML = `
+    try {
+        let acceptHeader = req.get('Accept') || '';
+        let userAgent = req.get('User-Agent') || '';
+        
+        let isDiscord = userAgent.includes('Discordbot');
+        
+        if (acceptHeader.includes('text/html') || isDiscord) {
+            if (req.query.id) {
+                if (isDiscord) {
+                    fs.readdir(__dirname + '/user_cont/videos', (err, files) => {
+                        if (err) {
+                            return res.redirect('./?video=' + req.query.id);
+                        }
+                        
+                        if (files.includes('#' + req.query.id + '.json')) {
+                            let thisVideo = Utils.getJSON('./user_cont/videos/#' + req.query.id + '.json');
+                            if (thisVideo == undefined) {
+                                return res.redirect('./?video=' + req.query.id);
+                            }
+                            let embedHTML = `
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <meta property="og:title" content="BonziTUBE">
-    <meta property="og:description" content="Shared video: ${thisVideo.title || 'Video'}">
+    <meta property="og:description" content="Shared video: ${thisVideo.title || 'Video'} - by ${thisVideo.author}">
     <meta property="og:type" content="video.other">
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="BonziTUBE">
-    <meta name="twitter:description" content="Shared video: ${thisVideo.title || 'Video'}">
-    <title>BonziTUBE - ${thisVideo.title || 'Video'}</title>
+    <meta name="twitter:description" content="Shared video: ${thisVideo.title || 'Video'} - by ${thisVideo.author}">
+    <title>BonziTUBE</title>
 </head>
 <body>
     <script>
@@ -159,37 +160,43 @@ app.get('/video', async (req, res) => {
     </script>
 </body>
 </html>`;
-            
-            return res.send(embedHTML);
-          } else {
-            return res.redirect('./?video='+req.query.id);
-          }
-        });
-      } else {
-        return res.redirect('./?video='+req.query.id);
-      }
+                            
+                            return res.send(embedHTML);
+                        } else {
+                            return res.redirect('./?video=' + req.query.id);
+                        }
+                    });
+                } else {
+                    return res.redirect('./?video=' + req.query.id);
+                }
+            } else {
+                return res.status(400).send('No video ID provided');
+            }
+            return;
+        }
+        if (req.query.id) {
+            fs.readdir(__dirname + '/user_cont/videos', (err, files) => {
+                if (err) {
+                    return res.status(500).json({error: 'Server error'});
+                }
+                
+                if (files.includes('#' + req.query.id + '.json')) {
+                    let thisVideo = Utils.getJSON('./user_cont/videos/#' + req.query.id + '.json');
+                    if (thisVideo && thisVideo["creator"] !== undefined) {
+                        delete thisVideo["creator"];
+                    }
+                    return res.json(thisVideo);
+                } else {
+                    return res.status(404).json({error: 'Video not found'});
+                }
+            });
+        } else {
+            return res.status(400).json({error: 'No video ID provided'});
+        }
+    } catch (e) {
+        console.error('Error in /video route:', e);
+        return res.status(500).json({error: 'Internal server error'});
     }
-  }
-  
-  if(req.query.id){
-    fs.readdir(__dirname+'/user_cont/videos',(err,files)=>{
-      if(err) {
-        return res.status(500).json({error: 'Server error'});
-      }
-      
-      if(files.includes('#'+req.query.id+'.json')){
-        let thisVideo = Utils.getJSON('./user_cont/videos/#'+req.query.id+'.json');
-        if(thisVideo["creator"] !== undefined)delete thisVideo["creator"];
-        return res.json(thisVideo);
-      } else {
-        return res.status(404).json({error: 'Video not found'});
-      }
-    });
-  } else {
-    return res.status(400).json({error: 'No video ID provided'});
-  }
-}
-catch(e){}
 });
 let uses = {};
 let warnings = {};

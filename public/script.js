@@ -167,7 +167,7 @@ if(window.innerWidth < 800){
     $("left").style.display = 'none';
     $("right").style.display = 'none';
 }
-socket.on("err",data=>alert("Upload ERROR: "+data));
+socket.on("err",data=>alert("ERROR: "+data));
 socket.on("uploadsucceed",data=>{
     alert("Upload success!");
     socket.emit("home",{user:"Anonymous"});

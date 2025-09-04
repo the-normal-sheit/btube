@@ -215,7 +215,7 @@ io.on("connection",socket => {
     updateCatalogue(socket.ip);
     console.log(socket.ip);
     if(bans.includes(socket.ip)){
-        socket.err("You are banned from BonziTUBE!");
+        socket.emit("err","You are banned from BonziTUBE!");
         socket.disconnect(true);
         return;
     }

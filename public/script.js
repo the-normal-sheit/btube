@@ -207,6 +207,7 @@ if(location.href.substring(0,location.href.length-10).endsWith("?video=")){
     .then(response =>{ return response.json()})
     .then(data => {
         Page.video(data);
+        socket.emit("goto",data["id"]);
     });
     },1000);
 }

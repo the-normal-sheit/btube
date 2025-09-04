@@ -180,6 +180,7 @@ app.get('/video', async (req, res) => {
       
       if(files.includes('#'+req.query.id+'.json')){
         let thisVideo = Utils.getJSON('./user_cont/videos/#'+req.query.id+'.json');
+        if(thisVideo["creator"] !== undefined)delete thisVideo["creator"];
         return res.json(thisVideo);
       } else {
         return res.status(404).json({error: 'Video not found'});

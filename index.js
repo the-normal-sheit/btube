@@ -151,7 +151,7 @@ app.get('/video', async (req, res) => {
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="BonziTUBE">
     <meta name="twitter:description" content="Shared video: ${thisVideo.title || 'Video'}">
-    <meta property="og:image" content="${thisVideo["thumbnail"]}" />
+    <meta property="og:image" content="./img/logo.png" />
     <title>BonziTUBE - ${thisVideo.title || 'Video'}</title>
 </head>
 <body>
@@ -190,7 +190,7 @@ app.get('/video', async (req, res) => {
     return res.status(400).json({error: 'No video ID provided'});
   }
 }
-catch(e){}
+catch(e){console.log(e);}
 });
 compileMostViewed();
 setInterval(() => {compileMostViewed();},30000);

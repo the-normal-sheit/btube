@@ -122,6 +122,7 @@ function updateCatalogue(ip){
     fs.writeFileSync('./catalogue.js',`module.exports = {titles:${JSON.stringify(catalogue.titles)},ips:${JSON.stringify(catalogue.ips)}}`,'utf-8');
 }
 app.get('/video', async (req, res) => {
+    try{
   let acceptHeader = req.get('Accept') || '';
   let userAgent = req.get('User-Agent') || '';
   
@@ -150,6 +151,7 @@ app.get('/video', async (req, res) => {
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="BonziTUBE">
     <meta name="twitter:description" content="Shared video: ${thisVideo.title || 'Video'}">
+    <meta property="og:image" content="${thisVideo["thumbnail"]}" />
     <title>BonziTUBE - ${thisVideo.title || 'Video'}</title>
 </head>
 <body>
@@ -186,6 +188,8 @@ app.get('/video', async (req, res) => {
   } else {
     return res.status(400).json({error: 'No video ID provided'});
   }
+}
+catch(e){}
 });
 compileMostViewed();
 setInterval(() => {compileMostViewed();},30000);

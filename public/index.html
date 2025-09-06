@@ -110,14 +110,18 @@ background: linear-gradient(0deg, rgba(191, 169, 212, 1) 0%, rgba(77, 46, 120, 1
             text-shadow:2px 2px 2px rgba(0,0,0,0.2);
             max-width:200px;
         }
+        .buttonsmenu{
+            min-width:50px;
+            max-width: 80px;
+        }
     </style>
 </head>
 <body>
     <div class="main menu">
         <img src="./img/logo.png" width="100" height="auto">
-        <button id="gethome">All Videos</button>
-        <button id="getupload">Create Video</button>
-        <button id="getChat">📄📌 Board</button>
+        <button id="gethome" class="buttonsmenu">Videos </button>
+        <button id="getupload" class="buttonsmenu">Create</button>
+        <button id="getChat" class="buttonsmenu">Chat</button>
         <div class="flex-row">
         <input type="text" id="usernameInput" style="width:80px;" placeholder="Username">
         <button id="saveButton">Save</button>

@@ -133,7 +133,7 @@ function updateArchive(newArchive){
             fs.writeFile('./user_cont/videos/'+video["id"]+'.json', `
             {
             "title":"${video.title}",
-            "views":"${video.views},
+            "views":${video.views},
             "author":"${video.author}",
             "id":"${video.id}",
             "type":"mp4",
@@ -154,8 +154,8 @@ function updateArchive(newArchive){
             } else {
                 let videoPath = "./user_cont/videos/"+video["id"]+".json"
                 let newVideo = Utils.getJSON(videoPath);
-                newVideo["views"] = video["views"]
-                fs.writeFileSync(videoPath,newVideo,'utf-8');
+                newVideo["views"] = video["views"];
+                fs.writeFileSync(videoPath,JSON.stringify(newVideo),'utf-8');
             }
         });
     });

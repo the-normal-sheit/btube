@@ -123,7 +123,8 @@ function updateCatalogue(ip){
     catalogue.ips[ip] = catalogue.ips[ip] == undefined ? [] : catalogue.ips[ip];
     fs.writeFileSync('./catalogue.js',`module.exports = {titles:${JSON.stringify(catalogue.titles)},ips:${JSON.stringify(catalogue.ips)}}`,'utf-8');
 }
-function updateArchive(){
+function updateArchive(newArchive){
+    if(newArchive == undefined){
     let archive = Utils.getJSON("./archive.json");
     fs.readdir(__dirname+'/user_cont/videos',(err,files)=>{
         archive.forEach(video => {
@@ -132,14 +133,14 @@ function updateArchive(){
             fs.writeFile('./user_cont/videos/'+video["id"]+'.json', `
             {
             "title":"${video.title}",
-            "views":0,
+            "views":"${video.views},
             "author":"${video.author}",
-            "id":"#${video.id}",
+            "id":"${video.id}",
             "type":"mp4",
             "src":"${video.src}",
             "date":${video.date},
             "thumbnail":"${video.thumbnail}",
-            "creator":"${video.creator}",
+            "creator":"Unknown",
             "timestamp":"${video.timestamp}"
             }
             `, (err) => {
@@ -150,9 +151,18 @@ function updateArchive(){
             }
             });
 
+            } else {
+                let videoPath = "./user_cont/videos/"+video["id"]+".json"
+                let newVideo = Utils.getJSON(videoPath);
+                newVideo["views"] = video["views"]
+                fs.writeFileSync(videoPath,newVideo,'utf-8');
             }
         });
     });
+    }
+    else {
+
+    }
 }
 app.get('/video', async (req, res) => {
     try {

@@ -123,6 +123,37 @@ function updateCatalogue(ip){
     catalogue.ips[ip] = catalogue.ips[ip] == undefined ? [] : catalogue.ips[ip];
     fs.writeFileSync('./catalogue.js',`module.exports = {titles:${JSON.stringify(catalogue.titles)},ips:${JSON.stringify(catalogue.ips)}}`,'utf-8');
 }
+function updateArchive(){
+    let archive = Utils.getJSON("./archive.json");
+    fs.readdir(__dirname+'/user_cont/videos',(err,files)=>{
+        archive.forEach(video => {
+            if(!files.includes(video["id"]+'.json')){
+
+            fs.writeFile('./user_cont/videos/'+video["id"]+'.json', `
+            {
+            "title":"${video.title}",
+            "views":0,
+            "author":"${video.author}",
+            "id":"#${video.id}",
+            "type":"mp4",
+            "src":"${video.src}",
+            "date":${video.date},
+            "thumbnail":"${video.thumbnail}",
+            "creator":"${video.creator}",
+            "timestamp":"${video.timestamp}"
+            }
+            `, (err) => {
+            if (err) {
+                console.error('Error creating file:', err);
+            } else {
+                console.log('File created successfully!');
+            }
+            });
+
+            }
+        });
+    });
+}
 app.get('/video', async (req, res) => {
     try {
         let acceptHeader = req.get('Accept') || '';
@@ -229,6 +260,7 @@ function currentDate(){
     return d.toDateString();
 }
 compileMostViewed();
+updateArchive();
 setInterval(() => {compileMostViewed();},30000);
 console.log(Utils.averageSet([3,4,3,1,1,1,5,3]));
 let viewCount = 0;

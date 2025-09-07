@@ -79,7 +79,7 @@ function compileMostViewed(){
             console.error('Failed to get videos: ', err);
             return;
         }
-    
+        let archive = Utils.getJSON('archive.json');
         files.forEach(file => {
             let videoCont = Utils.getJSON("./user_cont/videos/"+file);
             let thisRating = Utils.getJSON("./user_cont/ratings/"+file.replace("#","$"));

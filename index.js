@@ -161,7 +161,7 @@ function updateArchive(newArchive){
     });
     }
     else {
-
+        fs.writeFileSync('archive.json',JSON.stringify(newArchive),'utf-8');
     }
 }
 app.get('/video', async (req, res) => {

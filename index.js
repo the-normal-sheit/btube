@@ -449,7 +449,7 @@ io.on("connection",socket => {
         }
         data = {
             author:Utils.sanitizeString(data.author).substring(0,28),
-            title:Utils.sanitizeString(data.title).substring(0,40),
+            title:Utils.sanitizeString(data.title).substring(0,30),
             src:Utils.sanitizeString(data.src).trim(" "),
             thumbnail:Utils.sanitizeString(data.thumbnail).trim(" ")
         }
